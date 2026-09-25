@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Website-10B981?style=for-the-badge&logo=googlechrome&logoColor=white)](http://fitness-tracker-production-f4e4.up.railway.app/)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Website-10B981?style=for-the-badge&logo=googlechrome&logoColor=white)](https://fitness-tracker-production-f4e4.up.railway.app)
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![MySQL](https://img.shields.io/badge/MySQL-8.4-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
@@ -13,7 +13,7 @@
 
 **A modern, full-stack fitness and wellness tracking application built with Spring Boot, Spring Security, JWT, MySQL, and a responsive glassmorphism UI.**
 
-[Explore Live Demo 🚀](https://fitness-tracker-production-xxxx.up.railway.app) · [Report Bug 🐛](https://github.com/HarshitYash/Fitness-Tracker/issues) · [API Documentation 📚](#-api-documentation)
+[Explore Live Demo 🚀](https://fitness-tracker-production-f4e4.up.railway.app) · [Report Bug 🐛](https://github.com/HarshitYash/Fitness-Tracker/issues) · [API Documentation 📚](#-api-documentation)
 
 </div>
 
