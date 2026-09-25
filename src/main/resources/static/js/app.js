@@ -1,6 +1,8 @@
 const API = '/api';
 const STORAGE_KEY = 'fitness_session';
 const THEME_KEY = 'fitness_theme';
+const PENDING_VERIFICATION_KEY = 'fitness_pending_verification';
+const PENDING_RESET_KEY = 'fitness_pending_reset';
 
 // DOM elements
 const homeScreen = document.getElementById('home-screen');
@@ -28,9 +30,43 @@ const homeNavActions = document.getElementById('home-nav-actions');
 // App state
 let session = loadSession();
 let activities = [];
-let pendingVerification = null;
-let pendingReset = null;
+let pendingVerification = loadPendingVerification();
+let pendingReset = loadPendingReset();
 let oauthStatus = { google: false, github: false };
+
+function loadPendingVerification() {
+    try {
+        return JSON.parse(sessionStorage.getItem(PENDING_VERIFICATION_KEY));
+    } catch {
+        return null;
+    }
+}
+
+function savePendingVerification(data) {
+    pendingVerification = data;
+    if (data) {
+        sessionStorage.setItem(PENDING_VERIFICATION_KEY, JSON.stringify(data));
+    } else {
+        sessionStorage.removeItem(PENDING_VERIFICATION_KEY);
+    }
+}
+
+function loadPendingReset() {
+    try {
+        return JSON.parse(sessionStorage.getItem(PENDING_RESET_KEY));
+    } catch {
+        return null;
+    }
+}
+
+function savePendingReset(data) {
+    pendingReset = data;
+    if (data) {
+        sessionStorage.setItem(PENDING_RESET_KEY, JSON.stringify(data));
+    } else {
+        sessionStorage.removeItem(PENDING_RESET_KEY);
+    }
+}
 
 // Theme toggle
 let lastThemeToggle = 0;
@@ -579,39 +615,64 @@ document.getElementById('back-to-forgot').addEventListener('click', () => {
 
 forgotForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = forgotForm.querySelector('button[type="submit"]');
     const data = Object.fromEntries(new FormData(forgotForm));
     try {
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending OTP...';
+        }
         const res = await api('/auth/forgot-password', {
             method: 'POST',
-            body: JSON.stringify({ email: data.email })
+            body: JSON.stringify({ email: data.email.trim() })
         });
-        showToast(res.message || 'OTP sent');
-        pendingReset = { email: data.email, otp: res.otp };
+        showToast(res.message || 'OTP sent to your email');
+        savePendingReset({ email: data.email.trim(), otp: res.otp });
         navigate('/reset-password');
     } catch (err) {
-        showToast(err.message, true);
+        showToast(err.message || 'Failed to send reset code', true);
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Send Reset Code';
+        }
     }
 });
 
 resetForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!pendingReset) return;
+    const activeReset = pendingReset || loadPendingReset();
+    if (!activeReset || !activeReset.email) {
+        showToast('Reset session expired. Please enter your email again.', true);
+        navigate('/forgot-password');
+        return;
+    }
+    const submitBtn = resetForm.querySelector('button[type="submit"]');
     const data = Object.fromEntries(new FormData(resetForm));
     try {
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Updating Password...';
+        }
         const res = await api('/auth/reset-password', {
             method: 'POST',
             body: JSON.stringify({
-                email: pendingReset.email,
-                code: data.code,
+                email: activeReset.email,
+                code: data.code.trim(),
                 newPassword: data.newPassword
             })
         });
-        showToast(res.message || 'Password updated');
-        pendingReset = null;
+        showToast(res.message || 'Password updated successfully');
+        savePendingReset(null);
         loginForm.querySelector('[name="email"]').value = res.email || '';
         navigate('/login');
     } catch (err) {
-        showToast(err.message, true);
+        showToast(err.message || 'Failed to update password', true);
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Update Password';
+        }
     }
 });
 
@@ -674,13 +735,13 @@ registerForm.addEventListener('submit', async (e) => {
             method: 'POST',
             body: JSON.stringify(data)
         });
-        pendingVerification = {
-            email: data.email,
+        savePendingVerification({
+            email: data.email.trim(),
             phoneNumber: data.phoneNumber || '',
             password: data.password,
             emailOtp: res.emailOtp,
             smsOtp: res.smsOtp
-        };
+        });
         showToast(res.message || 'Account created! Please verify your OTP.');
         navigate('/verify-otp');
     } catch (err) {
@@ -695,78 +756,110 @@ registerForm.addEventListener('submit', async (e) => {
 
 otpForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!pendingVerification) return;
+    const activeVerif = pendingVerification || loadPendingVerification();
+    if (!activeVerif || !activeVerif.email) {
+        showToast('Verification session expired. Please register or sign in again.', true);
+        navigate('/login');
+        return;
+    }
+    const submitBtn = otpForm.querySelector('button[type="submit"]');
     const data = Object.fromEntries(new FormData(otpForm));
     try {
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Verifying...';
+        }
         await api('/auth/verify-otp', {
             method: 'POST',
             body: JSON.stringify({
-                email: pendingVerification.email,
+                email: activeVerif.email,
                 channel: 'EMAIL',
-                code: data.emailOtp
+                code: data.emailOtp.trim()
             })
         });
-        if (pendingVerification.phoneNumber && pendingVerification.phoneNumber.trim() && data.smsOtp) {
+        if (activeVerif.phoneNumber && activeVerif.phoneNumber.trim() && data.smsOtp && data.smsOtp.trim()) {
             await api('/auth/verify-otp', {
                 method: 'POST',
                 body: JSON.stringify({
-                    phoneNumber: pendingVerification.phoneNumber,
+                    phoneNumber: activeVerif.phoneNumber,
                     channel: 'SMS',
-                    code: data.smsOtp
+                    code: data.smsOtp.trim()
                 })
             });
         }
         showToast('Verified! Signing you in...');
-        const res = await api('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({
-                email: pendingVerification.email,
-                password: pendingVerification.password
-            })
-        });
-        saveSession({
-            token: res.token,
-            userId: res.userId,
-            firstName: res.firstName,
-            lastName: res.lastName,
-            email: res.email
-        });
-        pendingVerification = null;
-        navigate('/dashboard');
+        if (activeVerif.password) {
+            const res = await api('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: activeVerif.email,
+                    password: activeVerif.password
+                })
+            });
+            saveSession({
+                token: res.token,
+                userId: res.userId,
+                firstName: res.firstName,
+                lastName: res.lastName,
+                email: res.email
+            });
+            savePendingVerification(null);
+            navigate('/dashboard');
+        } else {
+            savePendingVerification(null);
+            navigate('/login');
+        }
     } catch (err) {
-        showToast(err.message, true);
+        showToast(err.message || 'OTP verification failed', true);
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Verify & Continue';
+        }
     }
 });
 
 document.getElementById('resend-email-otp').addEventListener('click', async () => {
-    if (!pendingVerification) return;
+    const activeVerif = pendingVerification || loadPendingVerification();
+    if (!activeVerif || !activeVerif.email) {
+        showToast('Session expired. Please sign in or register again.', true);
+        return;
+    }
     try {
         const res = await api('/auth/resend-otp', {
             method: 'POST',
-            body: JSON.stringify({ email: pendingVerification.email, channel: 'EMAIL' })
+            body: JSON.stringify({ email: activeVerif.email, channel: 'EMAIL' })
         });
-        pendingVerification.emailOtp = res.emailOtp;
-        if (res.emailOtp) otpForm.emailOtp.value = res.emailOtp;
-        showOtpStep(pendingVerification);
-        showToast(res.message || 'Email OTP sent');
+        activeVerif.emailOtp = res.emailOtp;
+        savePendingVerification(activeVerif);
+        const emailInput = otpForm.querySelector('[name="emailOtp"]');
+        if (emailInput && res.emailOtp) emailInput.value = res.emailOtp;
+        showOtpStep(activeVerif);
+        showToast(res.message || 'Email verification code sent');
     } catch (err) {
-        showToast(err.message, true);
+        showToast(err.message || 'Failed to resend email code', true);
     }
 });
 
 document.getElementById('resend-sms-otp').addEventListener('click', async () => {
-    if (!pendingVerification) return;
+    const activeVerif = pendingVerification || loadPendingVerification();
+    if (!activeVerif || !activeVerif.phoneNumber) {
+        showToast('No phone number registered with this session.', true);
+        return;
+    }
     try {
         const res = await api('/auth/resend-otp', {
             method: 'POST',
-            body: JSON.stringify({ phoneNumber: pendingVerification.phoneNumber, channel: 'SMS' })
+            body: JSON.stringify({ phoneNumber: activeVerif.phoneNumber, channel: 'SMS' })
         });
-        pendingVerification.smsOtp = res.smsOtp;
-        if (res.smsOtp) otpForm.smsOtp.value = res.smsOtp;
-        showOtpStep(pendingVerification);
-        showToast(res.message || 'SMS OTP sent');
+        activeVerif.smsOtp = res.smsOtp;
+        savePendingVerification(activeVerif);
+        const smsInput = otpForm.querySelector('[name="smsOtp"]');
+        if (smsInput && res.smsOtp) smsInput.value = res.smsOtp;
+        showOtpStep(activeVerif);
+        showToast(res.message || 'SMS verification code sent');
     } catch (err) {
-        showToast(err.message, true);
+        showToast(err.message || 'Failed to resend SMS code', true);
     }
 });
 
