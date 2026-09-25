@@ -19,4 +19,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addViewController("/activities").setViewName("forward:/index.html");
         registry.addViewController("/recommendations").setViewName("forward:/index.html");
     }
+
+    @org.springframework.context.annotation.Bean
+    public org.springframework.web.filter.ForwardedHeaderFilter forwardedHeaderFilter() {
+        return new org.springframework.web.filter.ForwardedHeaderFilter();
+    }
 }

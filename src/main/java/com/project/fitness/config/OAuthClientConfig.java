@@ -19,14 +19,19 @@ public class OAuthClientConfig {
             @Value("${app.oauth.google.client-id:}") String googleId,
             @Value("${app.oauth.google.client-secret:}") String googleSecret,
             @Value("${app.oauth.github.client-id:}") String githubId,
-            @Value("${app.oauth.github.client-secret:}") String githubSecret) {
+            @Value("${app.oauth.github.client-secret:}") String githubSecret,
+            @Value("${app.base-url:}") String appBaseUrl) {
         List<ClientRegistration> registrations = new ArrayList<>();
+        String base = (appBaseUrl != null && !appBaseUrl.isBlank())
+                ? appBaseUrl.trim().replaceAll("/+$", "")
+                : "{baseUrl}";
+
         if (isConfigured(googleId, googleSecret)) {
             registrations.add(CommonOAuth2Provider.GOOGLE.getBuilder("google")
                     .clientId(googleId.trim())
                     .clientSecret(googleSecret.trim())
                     .scope("openid", "profile", "email")
-                    .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+                    .redirectUri(base + "/login/oauth2/code/{registrationId}")
                     .build());
         }
         if (isConfigured(githubId, githubSecret)) {
@@ -34,7 +39,7 @@ public class OAuthClientConfig {
                     .clientId(githubId.trim())
                     .clientSecret(githubSecret.trim())
                     .scope("read:user", "user:email")
-                    .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+                    .redirectUri(base + "/login/oauth2/code/{registrationId}")
                     .build());
         }
         if (registrations.isEmpty()) {
