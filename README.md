@@ -1,79 +1,81 @@
-# Fitness Tracker
+# 🏋️ Fitness Tracker Application
 
-A personal fitness tracking application built with Spring Boot. Log workouts, view your activity history, and store personalized recommendations.
+A full-stack fitness and activity tracking web application built with **Spring Boot 3**, **Spring Security 6**, **JWT**, and **MySQL**, featuring automated activity logging, customized health recommendations, OTP verification workflows, and containerized deployment via **Docker**.
 
-## Tech stack
+---
 
-- Java 21
-- Spring Boot 4
-- Spring Data JPA
-- Spring Security + JWT
-- MySQL
-- Maven
+## 📑 Table of Contents
 
-## Project structure
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Architecture & Directory Structure](#-architecture--directory-structure)
+- [Prerequisites](#-prerequisites)
+- [Configuration & Environment Variables](#-configuration--environment-variables)
+- [Getting Started](#-getting-started)
+  - [Run with Maven (Local)](#run-with-maven-local)
+  - [Run with Docker Compose](#run-with-docker-compose)
+- [API Endpoints Reference](#-api-endpoints-reference)
+- [Running Tests](#-running-tests)
+- [License](#-license)
 
-```
-fitness-springboot-project/
-├── pom.xml
+---
+
+## ✨ Features
+
+- **Robust Authentication & Security**
+  - Stateless authentication using JSON Web Tokens (JWT).
+  - OAuth2 social login support (Google / GitHub).
+  - OTP verification system for user registration and password recovery.
+  - Role-based access control with `ROLE_USER` and `ROLE_ADMIN` permissions.
+- **Activity & Workout Management**
+  - Log, read, update, and delete fitness sessions across multiple activity types.
+  - Track session durations, calories burned, distances covered, and timestamps.
+- **Personalized Recommendations**
+  - Algorithmic feedback and workout/diet advice generated from historical activity records.
+- **API Documentation & Testing**
+  - Integrated Springdoc OpenAPI / Swagger UI for live interactive testing.
+  - Full suite of unit and integration tests covering security, controllers, and services.
+- **Containerization Ready**
+  - Pre-configured `Dockerfile` and `docker-compose.yml` for unified app and database orchestration.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend:** Java 17+, Spring Boot 3, Spring Data JPA, Spring Security 6
+- **Database:** MySQL 8.0+ (Production/Local), H2 In-Memory (Test suite)
+- **Security:** JWT (jjwt), OAuth2 Client, BCrypt Password Encoding
+- **Documentation:** Springdoc OpenAPI (Swagger UI)
+- **Frontend:** Vanilla JavaScript (ES6+), HTML5, CSS3
+- **DevOps & Build:** Maven, Docker, Docker Compose
+
+---
+
+## 📂 Architecture & Directory Structure
+
+```text
+Fitness-Tracker-main/
+├── docker/
+│   ├── Dockerfile
+│   └── docker-compose.yml
+├── docs/
+│   ├── GITHUB_COMMIT_PLAN.md
+│   └── LEARNING_ORDER.md
 ├── src/
 │   ├── main/
 │   │   ├── java/com/project/fitness/
-│   │   │   ├── FitnessApplication.java
-│   │   │   ├── config/
-│   │   │   ├── controller/
-│   │   │   ├── dto/
-│   │   │   ├── entity/
-│   │   │   ├── exception/
-│   │   │   ├── repository/
-│   │   │   ├── security/
-│   │   │   └── service/
+│   │   │   ├── config/          # Security, OpenAPI, Web MVC, and OAuth configs
+│   │   │   ├── controller/      # REST API Controllers (Auth, Activity, User, Admin)
+│   │   │   ├── dto/             # Request & Response payload DTOs
+│   │   │   ├── entity/          # JPA Entities (User, Activity, OtpCode, Recommendation)
+│   │   │   ├── exception/       # GlobalExceptionHandler and custom exceptions
+│   │   │   ├── repository/      # Spring Data JPA Repositories
+│   │   │   ├── security/        # JwtFilter, JwtService, OAuth2 Login Success Handlers
+│   │   │   └── service/         # Business domain logic and interfaces
 │   │   └── resources/
 │   │       ├── application.properties
-│   │       └── static/          # Frontend UI
-│   └── test/
-│       └── java/com/project/fitness/
-└── docker/
-```
-
-## Run locally
-
-1. Create a MySQL database named `fitness_tracker`.
-2. Copy `.env.example` and set your database credentials and JWT secret.
-3. Start the app:
-
-```bash
-mvn spring-boot:run
-```
-
-4. Open the app at [http://localhost:8080](http://localhost:8080).
-5. API docs are available at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html).
-
-## Docker
-
-```bash
-mvn clean package -DskipTests
-docker compose -f docker/docker-compose.yml up --build
-```
-
-## API overview
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Create an account |
-| POST | `/api/auth/login` | Sign in and receive a JWT |
-| POST | `/api/activities/user/{userId}` | Log an activity |
-| GET | `/api/activities/user/{userId}` | List user activities |
-| POST | `/api/recommendations/user/{userId}` | Add a recommendation |
-| GET | `/api/recommendations/user/{userId}` | List recommendations |
-
-Protected routes require the header: `Authorization: Bearer <token>`
-
-## Environment variables
-
-| Variable | Description |
-|----------|-------------|
-| `DB_URL` | JDBC URL (default: `jdbc:mysql://localhost:3306/fitness_tracker`) |
-| `DB_USER` | Database username |
-| `DB_PASSWORD` | Database password |
-| `JWT_SECRET` | Secret key (minimum 32 characters) |
+│   │       └── static/          # Embedded UI files (HTML, CSS, JS, static assets)
+│   └── test/                    # Unit and integration test suites
+├── .env.example
+├── pom.xml
+└── README.md
