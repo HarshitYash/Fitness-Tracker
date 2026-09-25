@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker - Workout & Health Platform</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/style.css?v=2.2">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Home View -->
+    <div id="home-screen" class="screen-view">
+        <header class="navbar">
+            <div class="nav-container">
+                <a href="/" class="brand-link" data-route="/">
+                    <img class="brand-logo" src="/img/logo.png" alt="Logo">
+                    <span class="brand-title">Fitness Tracker</span>
+                </a>
+                <nav class="nav-menu">
+                    <a href="#features" class="nav-item">Features</a>
+                    <a href="#calculator" class="nav-item">Workout Estimator</a>
+                    <a href="#how-it-works" class="nav-item">How It Works</a>
+                </nav>
+                <div class="nav-right" id="home-nav-actions">
+                    <button type="button" class="theme-toggle-btn" aria-label="Toggle theme">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <a href="/login" class="btn btn-outline btn-sm" data-route="/login">Sign in</a>
+                    <a href="/register" class="btn btn-primary btn-sm" data-route="/register">Register</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="home-wrapper">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-tag">
+                    <span>✨ Your Daily Fitness Companion</span>
+                </div>
+                <h1 class="hero-heading">
+                    Track Your Workouts.<br>
+                    <span class="text-gradient">Reach Your Health Goals.</span>
+                </h1>
+                <p class="hero-subtext">
+                    Stay active, stay motivated, and build healthy daily habits. Easily log your running,
+                    cycling, walking, and gym sessions, calculate your calories, and watch your progress grow.
+                </p>
+                <div class="hero-buttons">
+                    <a href="/register" class="btn btn-primary btn-lg" data-route="/register">Create Free Account</a>
+                    <a href="/login" class="btn btn-outline btn-lg" data-route="/login">Sign In</a>
+                    <a href="#calculator" class="btn btn-ghost btn-lg">Try Calculator ↓</a>
+                </div>
+
+                <div class="hero-stats-row">
+                    <div class="stat-pill">
+                        <strong>All-in-One</strong>
+                        <span>Running, Cycling & Weights</span>
+                    </div>
+                    <div class="stat-pill">
+                        <strong>Calorie Tracker</strong>
+                        <span>Instant Burn Estimates</span>
+                    </div>
+                    <div class="stat-pill">
+                        <strong>100% Free</strong>
+                        <span>Simple, Clean & Fast</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Workout Estimator -->
+            <section id="calculator" class="section-container">
+                <div class="section-title-wrap">
+                    <span class="badge-tag">Try It Live</span>
+                    <h2>Workout & Calorie Calculator</h2>
+                    <p>See how many calories you can burn during different exercises and get practical tips for your
+                        next workout.</p>
+                </div>
+
+                <div class="estimator-box">
+                    <div class="estimator-form">
+                        <div class="form-group">
+                            <label for="demo-activity">What's your workout?</label>
+                            <select id="demo-activity" class="input-control">
+                                <option value="RUNNING" data-met="9.8" selected>🏃 Running (~6 mph)</option>
+                                <option value="CYCLING" data-met="7.5">🚴 Cycling (Moderate pace)</option>
+                                <option value="WALKING" data-met="3.8">🚶 Walking (Brisk pace)</option>
+                                <option value="WEIGHT_TRAINING" data-met="6.0">🏋️ Weight Training (Full body)</option>
+                                <option value="CROSS_TRAINER" data-met="7.0">⚡ Cross Trainer / Elliptical</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="demo-duration">Workout Duration</label>
+                                <span id="demo-duration-val" class="count-badge">45 min</span>
+                            </div>
+                            <input type="range" id="demo-duration" min="10" max="120" step="5" value="45"
+                                class="slider-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Workout Intensity</label>
+                            <div class="intensity-group">
+                                <button type="button" class="intensity-btn" data-mult="0.85">Light</button>
+                                <button type="button" class="intensity-btn active" data-mult="1.0">Moderate</button>
+                                <button type="button" class="intensity-btn" data-mult="1.25">High</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="estimator-output">
+                        <div class="output-card main-burn">
+                            <span class="output-label">Estimated Calories Burned</span>
+                            <div class="calories-number-wrap">
+                                <span id="demo-calories" class="calories-val">485</span>
+                                <span class="calories-unit">kcal</span>
+                            </div>
+                            <span class="sub-text">Estimated for an active adult workout session</span>
+                        </div>
+
+                        <div class="output-row">
+                            <div class="output-card mini">
+                                <span class="output-label">Intensity Level</span>
+                                <span id="demo-met" class="output-val">Moderate</span>
+                            </div>
+                            <div class="output-card mini">
+                                <span class="output-label">Heart Rate Zone</span>
+                                <span id="demo-zone" class="output-val text-primary">Cardio Burn</span>
+                            </div>
+                        </div>
+
+                        <div class="coach-tip-card">
+                            <div class="tip-header">
+                                <span>💡</span>
+                                <strong>Helpful Fitness Tip</strong>
+                            </div>
+                            <p id="demo-ai-tip" class="tip-text">
+                                Great workout choice! Keep a steady rhythm and remember to drink water after your
+                                session.
+                            </p>
+                        </div>
+
+                        <a href="/register" class="btn btn-primary btn-block" data-route="/register">
+                            Start Tracking Your Workouts →
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Grid -->
+            <section id="features" class="section-container">
+                <div class="section-title-wrap">
+                    <span class="badge-tag">Why You'll Love It</span>
+                    <h2>Everything You Need to Stay Fit</h2>
+                    <p>Clean, focused tools designed to help you build consistency and stay motivated.</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-box">
+                        <div class="feature-icon">🏃‍♂️</div>
+                        <h3>Easy Workout Logging</h3>
+                        <p>Record your daily runs, walks, cycling rides, and gym sessions with duration and calories in
+                            just a few clicks.</p>
+                    </div>
+
+                    <div class="feature-box">
+                        <div class="feature-icon">📝</div>
+                        <h3>Personal Workout Notes</h3>
+                        <p>Save personal recommendations, form tips, and reminders for each workout to keep improving
+                            your technique.</p>
+                    </div>
+
+                    <div class="feature-box">
+                        <div class="feature-icon">📊</div>
+                        <h3>Personal Dashboard</h3>
+                        <p>See all your stats at a glance: total workouts completed, total active minutes, and overall
+                            calories burned.</p>
+                    </div>
+
+                    <div class="feature-box">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Fast & Simple Access</h3>
+                        <p>Sign in instantly with Google, GitHub, or email so your workout log is always saved and ready
+                            whenever you train.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How It Works -->
+            <section id="how-it-works" class="section-container">
+                <div class="section-title-wrap">
+                    <span class="badge-tag">Simple Steps</span>
+                    <h2>How It Works</h2>
+                    <p>Start tracking your workouts today in three easy steps.</p>
+                </div>
+
+                <div class="steps-grid">
+                    <div class="step-box">
+                        <span class="step-num">1</span>
+                        <h3>Create Your Account</h3>
+                        <p>Sign up in seconds using your email or with one click through Google or GitHub.</p>
+                    </div>
+                    <div class="step-box">
+                        <span class="step-num">2</span>
+                        <h3>Log Your Exercise</h3>
+                        <p>Pick your activity, enter your workout duration and calories, and save your entry.</p>
+                    </div>
+                    <div class="step-box">
+                        <span class="step-num">3</span>
+                        <h3>Track Your Progress</h3>
+                        <p>View your workout history on your dashboard and celebrate every milestone you achieve.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bottom CTA Banner -->
+            <section class="cta-banner-wrap">
+                <div class="cta-banner">
+                    <div class="cta-text">
+                        <h2>Ready to reach your fitness goals?</h2>
+                        <p>Create your free account today and make every workout count.</p>
+                    </div>
+                    <div class="cta-actions">
+                        <a href="/register" class="btn btn-primary btn-lg" data-route="/register">Get Started Free</a>
+                        <a href="/login" class="btn btn-outline btn-lg" data-route="/login">Sign In</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer-wrap">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="brand-link">
+                        <img class="brand-logo" src="/img/logo.png" alt="Logo">
+                        <span class="brand-title">Fitness Tracker</span>
+                    </div>
+                    <p>Your simple daily companion for logging workouts, tracking calories, and staying healthy.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <a href="/" data-route="/">Home</a>
+                    <a href="/login" data-route="/login">Sign In</a>
+                    <a href="/register" data-route="/register">Create Account</a>
+                    <a href="/dashboard" data-route="/dashboard">Dashboard</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Fitness Tracker. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Auth View -->
+    <div id="auth-screen" class="screen-view hidden">
+        <div class="auth-center-wrap">
+            <div class="auth-top-bar">
+                <a href="/" class="back-link" data-route="/">← Back to Home</a>
+                <button type="button" class="theme-toggle-btn" aria-label="Toggle theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+
+            <div class="auth-card">
+                <div class="auth-card-header">
+                    <img class="brand-logo" src="/img/logo.png" alt="Logo">
+                    <h2>Fitness Tracker</h2>
+                    <p>Track workouts, calories, and fitness progress</p>
+                </div>
+
+                <div id="oauth-error" class="alert-box alert-error hidden"></div>
+
+                <div class="tab-switch" id="auth-tabs">
+                    <button type="button" class="tab-btn active" data-tab="login">Sign In</button>
+                    <button type="button" class="tab-btn" data-tab="register">Register</button>
+                </div>
+
+                <!-- Sign In Form -->
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="login-email">Email Address</label>
+                        <input type="email" id="login-email" name="email" required placeholder="you@example.com"
+                            class="input-control" autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <div class="password-wrap">
+                            <input type="password" id="login-password" name="password" required minlength="8"
+                                placeholder="••••••••" class="input-control" autocomplete="current-password">
+                            <button type="button" class="toggle-password" aria-label="Show password">Show</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" id="login-submit">Sign In</button>
+                    <div class="link-wrap">
+                        <button type="button" id="forgot-link" class="link-btn">Forgot password?</button>
+                    </div>
+                </form>
+
+                <!-- Forgot Password Form -->
+                <form id="forgot-form" class="auth-form hidden">
+                    <p class="auth-help-text">Enter your registered email address to receive a 6-digit password reset
+                        OTP.</p>
+                    <div class="form-group">
+                        <label for="forgot-email">Email Address</label>
+                        <input type="email" id="forgot-email" name="email" required placeholder="you@example.com"
+                            class="input-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Send Reset OTP</button>
+                    <div class="link-wrap">
+                        <button type="button" id="back-to-login" class="link-btn">Back to Sign In</button>
+                    </div>
+                </form>
+
+                <!-- Reset Password Form -->
+                <form id="reset-form" class="auth-form hidden">
+                    <p class="auth-help-text">Enter the 6-digit OTP sent to your email along with your new password.</p>
+                    <p id="reset-otp-hint" class="hint-text"></p>
+                    <div class="form-group">
+                        <label for="reset-code">Verification OTP</label>
+                        <input type="text" id="reset-code" name="code" inputmode="numeric" maxlength="6"
+                            placeholder="000000" required class="input-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="reset-new-password">New Password</label>
+                        <div class="password-wrap">
+                            <input type="password" id="reset-new-password" name="newPassword" required minlength="8"
+                                placeholder="Min. 8 characters" class="input-control">
+                            <button type="button" class="toggle-password" aria-label="Show password">Show</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Update Password</button>
+                    <div class="link-wrap">
+                        <button type="button" id="back-to-forgot" class="link-btn">Resend OTP</button>
+                    </div>
+                </form>
+
+                <!-- Register Form -->
+                <form id="register-form" class="auth-form hidden">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reg-first-name">First Name</label>
+                            <input type="text" id="reg-first-name" name="firstName" required placeholder="John"
+                                class="input-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-last-name">Last Name</label>
+                            <input type="text" id="reg-last-name" name="lastName" required placeholder="Doe"
+                                class="input-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email Address</label>
+                        <input type="email" id="reg-email" name="email" required placeholder="you@example.com"
+                            class="input-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-phone">Mobile Number <span class="optional-label">(optional)</span></label>
+                        <input type="tel" id="reg-phone" name="phoneNumber" placeholder="9876543210 (optional)"
+                            pattern="^[0-9]{10,15}$" class="input-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Password</label>
+                        <div class="password-wrap">
+                            <input type="password" id="reg-password" name="password" required minlength="8"
+                                placeholder="Min. 8 characters" class="input-control" autocomplete="new-password">
+                            <button type="button" class="toggle-password" aria-label="Show password">Show</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                </form>
+
+                <!-- OTP Verification Form -->
+                <form id="otp-form" class="auth-form hidden">
+                    <p class="auth-help-text" id="otp-intro">Enter the 6-digit verification code.</p>
+                    <div id="otp-hint" class="hint-box"></div>
+                    <div class="form-group">
+                        <label for="otp-email-code">Email OTP</label>
+                        <input type="text" id="otp-email-code" name="emailOtp" inputmode="numeric" maxlength="6"
+                            placeholder="000000" required class="input-control">
+                    </div>
+                    <div class="form-group" id="mobile-otp-group">
+                        <label for="otp-sms-code">Mobile OTP</label>
+                        <input type="text" id="otp-sms-code" name="smsOtp" inputmode="numeric" maxlength="6"
+                            placeholder="000000" class="input-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Verify & Continue</button>
+                    <div class="otp-resend-row">
+                        <button type="button" id="resend-email-otp" class="btn btn-ghost btn-sm">Resend Email
+                            OTP</button>
+                        <button type="button" id="resend-sms-otp" class="btn btn-ghost btn-sm">Resend SMS OTP</button>
+                    </div>
+                </form>
+
+                <!-- Social Sign In -->
+                <div class="social-divider" id="social-divider">
+                    <span>or continue with</span>
+                </div>
+                <div class="social-buttons" id="social-login">
+                    <a class="btn btn-social" href="/oauth2/authorization/google">Google</a>
+                    <a class="btn btn-social" href="/oauth2/authorization/github">GitHub</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="app-screen" class="screen-view hidden">
+        <header class="navbar">
+            <div class="nav-container">
+                <a href="/" class="brand-link" data-route="/">
+                    <img class="brand-logo" src="/img/logo.png" alt="Logo">
+                    <span class="brand-title">Fitness Tracker</span>
+                </a>
+                <nav class="nav-menu">
+                    <a href="/" class="nav-item" data-route="/">Home</a>
+                    <a href="/dashboard" class="nav-item active" data-route="/dashboard">Dashboard</a>
+                    <a href="/activities" class="nav-item" data-route="/activities">Activities</a>
+                    <a href="/recommendations" class="nav-item" data-route="/recommendations">Recommendations</a>
+                </nav>
+                <div class="nav-right">
+                    <button type="button" class="theme-toggle-btn" aria-label="Toggle theme">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <span id="user-greeting" class="user-name-tag"></span>
+                    <button type="button" id="logout-btn" class="btn btn-outline btn-sm">Sign Out</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="dashboard-main">
+            <!-- Stats Summary Cards -->
+            <section class="stats-overview">
+                <div class="stat-card">
+                    <span class="stat-title">Total Workouts</span>
+                    <span id="stat-activities" class="stat-number">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Total Minutes</span>
+                    <span id="stat-minutes" class="stat-number">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Calories Burned</span>
+                    <span id="stat-calories" class="stat-number">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Recommendations</span>
+                    <span id="stat-recommendations" class="stat-number">0</span>
+                </div>
+            </section>
+
+            <!-- Activity & recommendation panels -->
+            <div class="dashboard-grid">
+                <!-- Log Activity Form -->
+                <section class="panel-card" id="activity-panel">
+                    <div class="panel-header">
+                        <h2>Log Workout Activity</h2>
+                    </div>
+                    <form id="activity-form" class="panel-form">
+                        <div class="form-group">
+                            <label for="act-type">Activity Type</label>
+                            <select id="act-type" name="type" required class="input-control">
+                                <option value="WALKING">🚶 Walking</option>
+                                <option value="RUNNING">🏃 Running</option>
+                                <option value="CYCLING">🚴 Cycling</option>
+                                <option value="WEIGHT_TRAINING">🏋️ Weight Training</option>
+                                <option value="CROSS_TRAINER">⚡ Cross Trainer</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="act-duration">Duration (minutes)</label>
+                                <input type="number" id="act-duration" name="durationMinutes" required min="1"
+                                    placeholder="30" class="input-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="act-calories">Calories Burned</label>
+                                <input type="number" id="act-calories" name="caloriesBurned" required min="0"
+                                    placeholder="250" class="input-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="act-time">Date & Start Time</label>
+                            <input type="datetime-local" id="act-time" name="startTime" required class="input-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Save Activity</button>
+                    </form>
+                </section>
+
+                <!-- Add Recommendation Form -->
+                <section class="panel-card" id="recommendation-panel">
+                    <div class="panel-header">
+                        <h2>Add Workout Recommendation</h2>
+                    </div>
+                    <form id="recommendation-form" class="panel-form">
+                        <div class="form-group">
+                            <label for="activity-select">Select Linked Activity</label>
+                            <select name="activityId" id="activity-select" required class="input-control">
+                                <option value="">Save an activity first</option>
+                            </select>
+                            <span class="field-hint">Select which workout this recommendation belongs to</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="rec-type">Recommendation Type</label>
+                            <select id="rec-type" name="type" required class="input-control">
+                                <option value="IMPROVEMENT">Improvement</option>
+                                <option value="RECOMMENDATION">General Recommendation</option>
+                                <option value="SAFETY">Safety Caution</option>
+                                <option value="SUGGESTION">Suggestion</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="rec-text">Recommendation Notes</label>
+                            <textarea id="rec-text" name="recommendation" required rows="3"
+                                placeholder="Maintain proper posture, hydrate before exercise..."
+                                class="input-control"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="rec-imp">Improvements <span class="field-hint">(comma-separated)</span></label>
+                            <input type="text" id="rec-imp" name="improvements" placeholder="pace, posture, cadence"
+                                class="input-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="rec-sug">Suggestions <span class="field-hint">(comma-separated)</span></label>
+                            <input type="text" id="rec-sug" name="suggestions" placeholder="stretching, hydration, rest"
+                                class="input-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="rec-saf">Safety Notes <span class="field-hint">(comma-separated)</span></label>
+                            <input type="text" id="rec-saf" name="safety" placeholder="warm-up, proper shoes"
+                                class="input-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Save Recommendation</button>
+                    </form>
+                </section>
+            </div>
+
+            <!-- Activity History List -->
+            <section class="panel-card history-panel" id="activities-section">
+                <div class="panel-header">
+                    <h2>Workout History</h2>
+                    <button type="button" id="refresh-btn" class="btn btn-outline btn-sm">Refresh Data</button>
+                </div>
+                <div id="activities-list" class="list-container empty-box">No activities recorded yet. Save your first
+                    workout above.</div>
+            </section>
+
+            <!-- Recommendations List -->
+            <section class="panel-card history-panel" id="recommendations-section">
+                <div class="panel-header">
+                    <h2>Saved Recommendations</h2>
+                </div>
+                <div id="recommendations-list" class="list-container empty-box">No recommendations saved yet.</div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/js/app.js?v=2.2"></script>
+</body>
+
+</html>
