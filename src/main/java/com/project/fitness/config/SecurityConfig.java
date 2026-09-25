@@ -59,6 +59,7 @@ public class SecurityConfig {
                 || clientRegistrationRepository.findByRegistrationId("github") != null) {
             http.oauth2Login(oauth -> oauth
                     .clientRegistrationRepository(clientRegistrationRepository)
+                    .loginPage("/login")
                     .successHandler(oAuth2LoginSuccessHandler)
                     .failureUrl("/login?oauthError=true"));
         }
