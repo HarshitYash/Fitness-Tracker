@@ -238,8 +238,8 @@ function showResetStep(info) {
     const hintElem = document.getElementById('reset-otp-hint');
     if (hintElem) {
         hintElem.textContent = info.otp
-            ? `Dev OTP: ${info.otp}`
-            : 'Check your email (or server log) for the OTP.';
+            ? `Verification Code: ${info.otp}`
+            : 'Check your email inbox for the password reset code.';
     }
     if (info.otp) {
         resetForm.querySelector('[name="code"]').value = info.otp;
@@ -273,15 +273,14 @@ function showOtpStep(info) {
 
     const hintElem = document.getElementById('otp-hint');
     if (hintElem) {
-        let content = `<div style="font-size:12px;color:var(--text-secondary);padding:8px;background:var(--bg-alt);border-radius:6px;margin-bottom:8px;">
-            📥 Email OTP sent to: <strong>${info.email}</strong><br>
-            View in Mailbox UI at: <a href="http://localhost:8025" target="_blank" style="color:var(--primary);text-decoration:underline;">http://localhost:8025</a>`;
+        let content = `<div style="font-size:13px;color:var(--text-secondary);padding:10px 14px;background:var(--bg-alt);border-radius:8px;margin-bottom:12px;border:1px solid var(--border);">
+            ✉️ Verification code sent to: <strong>${info.email}</strong>`;
         if (hasPhone) {
-            content += `<br>📱 SMS OTP sent to: <strong>${info.phoneNumber}</strong> (check console log)`;
+            content += `<br>📱 SMS code sent to: <strong>${info.phoneNumber}</strong>`;
         }
         content += `</div>`;
         if (info.emailOtp || (hasPhone && info.smsOtp)) {
-            content += `<button type="button" id="fill-dev-otp" class="btn btn-outline btn-sm" style="margin-bottom:8px;">⚡ Quick Fill OTP</button>`;
+            content += `<button type="button" id="fill-dev-otp" class="btn btn-outline btn-sm" style="margin-bottom:12px;">⚡ Auto-Fill Code</button>`;
         }
         hintElem.innerHTML = content;
         const fillBtn = document.getElementById('fill-dev-otp');
