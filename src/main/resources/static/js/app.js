@@ -656,23 +656,41 @@ function bindSocialButtons() {
 
 registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    const submitBtn = document.getElementById('register-submit') || registerForm.querySelector('button[type="submit"]');
     const data = Object.fromEntries(new FormData(registerForm));
+
+    if (!data.phoneNumber || !data.phoneNumber.trim()) {
+        delete data.phoneNumber;
+    } else {
+        data.phoneNumber = data.phoneNumber.trim();
+    }
+
     try {
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Account...';
+        }
         const res = await api('/auth/register', {
             method: 'POST',
             body: JSON.stringify(data)
         });
         pendingVerification = {
             email: data.email,
-            phoneNumber: data.phoneNumber,
+            phoneNumber: data.phoneNumber || '',
             password: data.password,
             emailOtp: res.emailOtp,
             smsOtp: res.smsOtp
         };
-        showToast(res.message || 'Verify your email OTP');
+        showToast(res.message || 'Account created! Please verify your OTP.');
         navigate('/verify-otp');
     } catch (err) {
-        showToast(err.message, true);
+        showToast(err.message || 'Registration failed. Please check your details.', true);
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Create Account';
+        }
     }
 });
 
