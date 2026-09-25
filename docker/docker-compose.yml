@@ -28,7 +28,7 @@ services:
   app:
     build:
       context: ..
-      dockerfile: docker/Dockerfile
+      dockerfile: Dockerfile
     container_name: fitness-app
     depends_on:
       mysql:
