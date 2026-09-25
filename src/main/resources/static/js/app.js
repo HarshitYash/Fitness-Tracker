@@ -482,7 +482,19 @@ function renderRoute(path = window.location.pathname) {
 }
 
 window.addEventListener('popstate', () => {
-    renderRoute(window.location.pathname);
+    session = loadSession();
+    updateHomeNav();
+    if (!captureOAuthRedirect()) {
+        renderRoute(window.location.pathname);
+    }
+});
+
+window.addEventListener('pageshow', (e) => {
+    session = loadSession();
+    updateHomeNav();
+    if (!captureOAuthRedirect()) {
+        renderRoute(window.location.pathname);
+    }
 });
 
 // Intercept local data-route links
