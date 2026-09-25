@@ -21,23 +21,25 @@ public class NotificationService {
     }
 
     public void sendEmailOtp(String email, String code) {
-        JavaMailSender sender = mailSender.getIfAvailable();
-        if (sender == null) {
-            log.info("Email OTP for {} is {}", email, code);
-            return;
-        }
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(from);
-            message.setTo(email);
-            message.setSubject("Fitness Tracker verification code");
-            message.setText("Your email verification OTP is " + code + ". It expires in a few minutes.");
-            sender.send(message);
-            log.info("Email OTP sent to {}", email);
-        } catch (Exception ex) {
-            log.warn("Could not send email to {}. Use the OTP shown in the app (dev mode) or check mail settings. OTP={}",
-                    email, code);
-        }
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            JavaMailSender sender = mailSender.getIfAvailable();
+            if (sender == null) {
+                log.info("Email OTP for {} is {}", email, code);
+                return;
+            }
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(from);
+                message.setTo(email);
+                message.setSubject("Fitness Tracker verification code");
+                message.setText("Your email verification OTP is " + code + ". It expires in a few minutes.");
+                sender.send(message);
+                log.info("Email OTP sent to {}", email);
+            } catch (Exception ex) {
+                log.warn("Could not send email to {}. Use the OTP shown in the app (dev mode) or check mail settings. OTP={}",
+                        email, code);
+            }
+        });
     }
 
     public void sendSmsOtp(String phoneNumber, String code) {
@@ -45,21 +47,23 @@ public class NotificationService {
     }
 
     public void sendPasswordResetOtp(String email, String code) {
-        JavaMailSender sender = mailSender.getIfAvailable();
-        if (sender == null) {
-            log.info("Password-reset OTP for {} is {}", email, code);
-            return;
-        }
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(from);
-            message.setTo(email);
-            message.setSubject("Fitness Tracker password reset code");
-            message.setText("Your password reset OTP is " + code + ". It expires in a few minutes.");
-            sender.send(message);
-            log.info("Password-reset OTP sent to {}", email);
-        } catch (Exception ex) {
-            log.warn("Could not send reset email to {}. OTP={}", email, code);
-        }
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            JavaMailSender sender = mailSender.getIfAvailable();
+            if (sender == null) {
+                log.info("Password-reset OTP for {} is {}", email, code);
+                return;
+            }
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(from);
+                message.setTo(email);
+                message.setSubject("Fitness Tracker password reset code");
+                message.setText("Your password reset OTP is " + code + ". It expires in a few minutes.");
+                sender.send(message);
+                log.info("Password-reset OTP sent to {}", email);
+            } catch (Exception ex) {
+                log.warn("Could not send reset email to {}. OTP={}", email, code);
+            }
+        });
     }
 }
