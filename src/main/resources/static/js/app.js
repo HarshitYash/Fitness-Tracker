@@ -254,6 +254,16 @@ function hideMainAuth() {
     resetForm.classList.add('hidden');
 }
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function showForgotStep() {
     if (homeScreen) homeScreen.classList.add('hidden');
     if (authScreen) authScreen.classList.remove('hidden');
@@ -261,6 +271,10 @@ function showForgotStep() {
 
     hideMainAuth();
     forgotForm.classList.remove('hidden');
+    const emailInput = forgotForm.querySelector('[name="email"]');
+    if (emailInput) {
+        setTimeout(() => emailInput.focus(), 50);
+    }
 }
 
 function showResetStep(info) {
@@ -268,17 +282,29 @@ function showResetStep(info) {
     if (authScreen) authScreen.classList.remove('hidden');
     if (appScreen) appScreen.classList.add('hidden');
 
-    pendingReset = info;
+    const activeInfo = info || loadPendingReset() || {};
+    pendingReset = activeInfo;
     hideMainAuth();
-    resetForm.classList.remove('hidden');
-    const hintElem = document.getElementById('reset-otp-hint');
-    if (hintElem) {
-        hintElem.textContent = info.otp
-            ? `Verification Code: ${info.otp}`
-            : 'Check your email inbox for the password reset code.';
-    }
-    if (info.otp) {
-        resetForm.querySelector('[name="code"]').value = info.otp;
+    if (resetForm) {
+        resetForm.classList.remove('hidden');
+        const emailInput = resetForm.querySelector('[name="email"]');
+        if (emailInput && activeInfo.email) {
+            emailInput.value = activeInfo.email;
+        }
+        const hintElem = document.getElementById('reset-otp-hint');
+        if (hintElem) {
+            hintElem.textContent = activeInfo.otp
+                ? `Verification Code: ${activeInfo.otp}`
+                : (activeInfo.email ? `Check ${activeInfo.email} for the password reset code.` : 'Enter your email and the 6-digit reset code.');
+        }
+        if (activeInfo.otp) {
+            const codeInput = resetForm.querySelector('[name="code"]');
+            if (codeInput) codeInput.value = activeInfo.otp;
+        }
+        const codeInput = resetForm.querySelector('[name="code"]');
+        if (codeInput) {
+            setTimeout(() => codeInput.focus(), 50);
+        }
     }
 }
 
@@ -287,44 +313,67 @@ function showOtpStep(info) {
     if (authScreen) authScreen.classList.remove('hidden');
     if (appScreen) appScreen.classList.add('hidden');
 
-    pendingVerification = info;
+    const activeInfo = info || loadPendingVerification() || {};
+    pendingVerification = activeInfo;
     hideMainAuth();
-    otpForm.classList.remove('hidden');
-    otpForm.querySelector('[name="emailOtp"]').value = '';
-    const smsInput = otpForm.querySelector('[name="smsOtp"]');
-    if (smsInput) smsInput.value = '';
+    if (otpForm) {
+        otpForm.classList.remove('hidden');
 
-    const hasPhone = Boolean(info.phoneNumber && info.phoneNumber.trim());
-    const mobileGroup = document.getElementById('mobile-otp-group');
-    const resendSmsBtn = document.getElementById('resend-sms-otp');
-    const introElem = document.getElementById('otp-intro');
-
-    if (mobileGroup) mobileGroup.classList.toggle('hidden', !hasPhone);
-    if (resendSmsBtn) resendSmsBtn.classList.toggle('hidden', !hasPhone);
-    if (introElem) {
-        introElem.textContent = hasPhone 
-            ? 'Enter the 6-digit codes sent to your email and mobile number.'
-            : 'Enter the 6-digit verification code sent to your email.';
-    }
-
-    const hintElem = document.getElementById('otp-hint');
-    if (hintElem) {
-        let content = `<div style="font-size:13px;color:var(--text-secondary);padding:10px 14px;background:var(--bg-alt);border-radius:8px;margin-bottom:12px;border:1px solid var(--border);">
-            ✉️ Verification code sent to: <strong>${info.email}</strong>`;
-        if (hasPhone) {
-            content += `<br>📱 SMS code sent to: <strong>${info.phoneNumber}</strong>`;
+        const emailInput = otpForm.querySelector('[name="email"]');
+        if (emailInput && activeInfo.email) {
+            emailInput.value = activeInfo.email;
         }
-        content += `</div>`;
-        if (info.emailOtp || (hasPhone && info.smsOtp)) {
-            content += `<button type="button" id="fill-dev-otp" class="btn btn-outline btn-sm" style="margin-bottom:12px;">⚡ Auto-Fill Code</button>`;
+
+        const emailOtpInput = otpForm.querySelector('[name="emailOtp"]');
+        if (emailOtpInput) {
+            emailOtpInput.value = activeInfo.emailOtp || '';
         }
-        hintElem.innerHTML = content;
-        const fillBtn = document.getElementById('fill-dev-otp');
-        if (fillBtn) {
-            fillBtn.addEventListener('click', () => {
-                if (info.emailOtp) otpForm.querySelector('[name="emailOtp"]').value = info.emailOtp;
-                if (hasPhone && info.smsOtp) otpForm.querySelector('[name="smsOtp"]').value = info.smsOtp;
-            });
+
+        const smsInput = otpForm.querySelector('[name="smsOtp"]');
+        if (smsInput) {
+            smsInput.value = activeInfo.smsOtp || '';
+        }
+
+        const hasPhone = Boolean(activeInfo.phoneNumber && activeInfo.phoneNumber.trim());
+        const mobileGroup = document.getElementById('mobile-otp-group');
+        const resendSmsBtn = document.getElementById('resend-sms-otp');
+        const introElem = document.getElementById('otp-intro');
+
+        if (mobileGroup) mobileGroup.classList.toggle('hidden', !hasPhone);
+        if (resendSmsBtn) resendSmsBtn.classList.toggle('hidden', !hasPhone);
+        if (introElem) {
+            introElem.textContent = hasPhone 
+                ? 'Enter the 6-digit codes sent to your email and mobile number.'
+                : 'Enter the 6-digit verification code sent to your email.';
+        }
+
+        const hintElem = document.getElementById('otp-hint');
+        if (hintElem) {
+            if (activeInfo.email) {
+                let content = `<div style="font-size:13px;color:var(--text-secondary);padding:10px 14px;background:var(--bg-alt);border-radius:8px;margin-bottom:12px;border:1px solid var(--border);">
+                    ✉️ Verification code sent to: <strong>${escapeHtml(activeInfo.email)}</strong>`;
+                if (hasPhone) {
+                    content += `<br>📱 SMS code sent to: <strong>${escapeHtml(activeInfo.phoneNumber)}</strong>`;
+                }
+                content += `</div>`;
+                if (activeInfo.emailOtp || (hasPhone && activeInfo.smsOtp)) {
+                    content += `<button type="button" id="fill-dev-otp" class="btn btn-outline btn-sm" style="margin-bottom:12px;">⚡ Auto-Fill Code</button>`;
+                }
+                hintElem.innerHTML = content;
+                const fillBtn = document.getElementById('fill-dev-otp');
+                if (fillBtn) {
+                    fillBtn.addEventListener('click', () => {
+                        if (activeInfo.emailOtp && emailOtpInput) emailOtpInput.value = activeInfo.emailOtp;
+                        if (hasPhone && activeInfo.smsOtp && smsInput) smsInput.value = activeInfo.smsOtp;
+                    });
+                }
+            } else {
+                hintElem.innerHTML = '';
+            }
+        }
+
+        if (emailOtpInput) {
+            setTimeout(() => emailOtpInput.focus(), 50);
         }
     }
 }
@@ -504,9 +553,9 @@ function renderRoute(path = window.location.pathname) {
         } else if (cleanPath === '/forgot-password') {
             showForgotStep();
         } else if (cleanPath === '/reset-password') {
-            showResetStep(pendingReset || { email: '', otp: '' });
+            showResetStep(pendingReset || loadPendingReset() || { email: '', otp: '' });
         } else if (cleanPath === '/verify-otp') {
-            showOtpStep(pendingVerification || { email: '', phoneNumber: '', emailOtp: '', smsOtp: '' });
+            showOtpStep(pendingVerification || loadPendingVerification() || { email: '', phoneNumber: '', emailOtp: '', smsOtp: '' });
         } else if (cleanPath === '/login') {
             document.querySelectorAll('.tab-btn').forEach(t => t.classList.toggle('active', t.dataset.tab === 'login'));
             showLoginRegister(true);
@@ -559,8 +608,10 @@ loginForm.addEventListener('submit', async (e) => {
     const submitBtn = document.getElementById('login-submit');
     const data = Object.fromEntries(new FormData(loginForm));
     try {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Signing in...';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing in...';
+        }
         const res = await api('/auth/login', {
             method: 'POST',
             body: JSON.stringify(data)
@@ -575,10 +626,22 @@ loginForm.addEventListener('submit', async (e) => {
         showToast('Welcome back!');
         navigate('/dashboard');
     } catch (err) {
-        showToast(err.message || 'Could not sign in', true);
+        const msg = err.message || 'Could not sign in';
+        showToast(msg, true);
+        if (msg.toLowerCase().includes('verify')) {
+            savePendingVerification({
+                email: (data.email || '').trim(),
+                password: data.password || ''
+            });
+            setTimeout(() => {
+                navigate('/verify-otp');
+            }, 800);
+        }
     } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign In';
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Sign In';
+        }
     }
 });
 
@@ -613,6 +676,14 @@ document.getElementById('back-to-forgot').addEventListener('click', () => {
     navigate('/forgot-password');
 });
 
+document.getElementById('reset-back-to-login')?.addEventListener('click', () => {
+    navigate('/login');
+});
+
+document.getElementById('otp-back-to-login')?.addEventListener('click', () => {
+    navigate('/login');
+});
+
 forgotForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const submitBtn = forgotForm.querySelector('button[type="submit"]');
@@ -641,14 +712,27 @@ forgotForm.addEventListener('submit', async (e) => {
 
 resetForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const activeReset = pendingReset || loadPendingReset();
-    if (!activeReset || !activeReset.email) {
-        showToast('Reset session expired. Please enter your email again.', true);
-        navigate('/forgot-password');
+    e.stopPropagation();
+    const data = Object.fromEntries(new FormData(resetForm));
+    const activeReset = pendingReset || loadPendingReset() || {};
+    const email = (data.email || activeReset.email || '').trim();
+    const code = (data.code || '').trim();
+    const newPassword = data.newPassword;
+
+    if (!email) {
+        showToast('Please enter your email address.', true);
         return;
     }
+    if (!code) {
+        showToast('Please enter the 6-digit verification code.', true);
+        return;
+    }
+    if (!newPassword || newPassword.length < 8) {
+        showToast('Password must be at least 8 characters.', true);
+        return;
+    }
+
     const submitBtn = resetForm.querySelector('button[type="submit"]');
-    const data = Object.fromEntries(new FormData(resetForm));
     try {
         if (submitBtn) {
             submitBtn.disabled = true;
@@ -657,14 +741,17 @@ resetForm.addEventListener('submit', async (e) => {
         const res = await api('/auth/reset-password', {
             method: 'POST',
             body: JSON.stringify({
-                email: activeReset.email,
-                code: data.code.trim(),
-                newPassword: data.newPassword
+                email: email,
+                code: code,
+                newPassword: newPassword
             })
         });
         showToast(res.message || 'Password updated successfully');
         savePendingReset(null);
-        loginForm.querySelector('[name="email"]').value = res.email || '';
+        if (loginForm) {
+            const loginEmail = loginForm.querySelector('[name="email"]');
+            if (loginEmail) loginEmail.value = res.email || email;
+        }
         navigate('/login');
     } catch (err) {
         showToast(err.message || 'Failed to update password', true);
@@ -735,13 +822,14 @@ registerForm.addEventListener('submit', async (e) => {
             method: 'POST',
             body: JSON.stringify(data)
         });
-        savePendingVerification({
+        const verifData = {
             email: data.email.trim(),
             phoneNumber: data.phoneNumber || '',
             password: data.password,
             emailOtp: res.emailOtp,
             smsOtp: res.smsOtp
-        });
+        };
+        savePendingVerification(verifData);
         showToast(res.message || 'Account created! Please verify your OTP.');
         navigate('/verify-otp');
     } catch (err) {
@@ -756,14 +844,24 @@ registerForm.addEventListener('submit', async (e) => {
 
 otpForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const activeVerif = pendingVerification || loadPendingVerification();
-    if (!activeVerif || !activeVerif.email) {
-        showToast('Verification session expired. Please register or sign in again.', true);
-        navigate('/login');
+    e.stopPropagation();
+    const data = Object.fromEntries(new FormData(otpForm));
+    const activeVerif = pendingVerification || loadPendingVerification() || {};
+    const email = (data.email || activeVerif.email || '').trim();
+    const phoneNumber = (activeVerif.phoneNumber || '').trim();
+    const emailOtp = (data.emailOtp || '').trim();
+    const smsOtp = (data.smsOtp || '').trim();
+
+    if (!email) {
+        showToast('Please enter your email address.', true);
         return;
     }
+    if (!emailOtp) {
+        showToast('Please enter the 6-digit email OTP.', true);
+        return;
+    }
+
     const submitBtn = otpForm.querySelector('button[type="submit"]');
-    const data = Object.fromEntries(new FormData(otpForm));
     try {
         if (submitBtn) {
             submitBtn.disabled = true;
@@ -772,43 +870,57 @@ otpForm.addEventListener('submit', async (e) => {
         await api('/auth/verify-otp', {
             method: 'POST',
             body: JSON.stringify({
-                email: activeVerif.email,
+                email: email,
                 channel: 'EMAIL',
-                code: data.emailOtp.trim()
+                code: emailOtp
             })
         });
-        if (activeVerif.phoneNumber && activeVerif.phoneNumber.trim() && data.smsOtp && data.smsOtp.trim()) {
-            await api('/auth/verify-otp', {
-                method: 'POST',
-                body: JSON.stringify({
-                    phoneNumber: activeVerif.phoneNumber,
-                    channel: 'SMS',
-                    code: data.smsOtp.trim()
-                })
-            });
+
+        if (phoneNumber && smsOtp) {
+            try {
+                await api('/auth/verify-otp', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        phoneNumber: phoneNumber,
+                        channel: 'SMS',
+                        code: smsOtp
+                    })
+                });
+            } catch (smsErr) {
+                console.warn('SMS OTP verification notice:', smsErr);
+            }
         }
+
         showToast('Verified! Signing you in...');
         if (activeVerif.password) {
-            const res = await api('/auth/login', {
-                method: 'POST',
-                body: JSON.stringify({
-                    email: activeVerif.email,
-                    password: activeVerif.password
-                })
-            });
-            saveSession({
-                token: res.token,
-                userId: res.userId,
-                firstName: res.firstName,
-                lastName: res.lastName,
-                email: res.email
-            });
-            savePendingVerification(null);
-            navigate('/dashboard');
-        } else {
-            savePendingVerification(null);
-            navigate('/login');
+            try {
+                const res = await api('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        email: email,
+                        password: activeVerif.password
+                    })
+                });
+                saveSession({
+                    token: res.token,
+                    userId: res.userId,
+                    firstName: res.firstName,
+                    lastName: res.lastName,
+                    email: res.email
+                });
+                savePendingVerification(null);
+                navigate('/dashboard');
+                return;
+            } catch (loginErr) {
+                // fall through to login
+            }
         }
+        savePendingVerification(null);
+        if (loginForm) {
+            const loginEmail = loginForm.querySelector('[name="email"]');
+            if (loginEmail) loginEmail.value = email;
+        }
+        navigate('/login');
     } catch (err) {
         showToast(err.message || 'OTP verification failed', true);
     } finally {
@@ -819,18 +931,25 @@ otpForm.addEventListener('submit', async (e) => {
     }
 });
 
-document.getElementById('resend-email-otp').addEventListener('click', async () => {
-    const activeVerif = pendingVerification || loadPendingVerification();
-    if (!activeVerif || !activeVerif.email) {
-        showToast('Session expired. Please sign in or register again.', true);
+document.getElementById('resend-email-otp')?.addEventListener('click', async () => {
+    const activeVerif = pendingVerification || loadPendingVerification() || {};
+    const email = (otpForm.querySelector('[name="email"]')?.value || activeVerif.email || '').trim();
+    if (!email) {
+        showToast('Please enter your email address first.', true);
         return;
     }
+    const btn = document.getElementById('resend-email-otp');
     try {
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+        }
         const res = await api('/auth/resend-otp', {
             method: 'POST',
-            body: JSON.stringify({ email: activeVerif.email, channel: 'EMAIL' })
+            body: JSON.stringify({ email: email, channel: 'EMAIL' })
         });
-        activeVerif.emailOtp = res.emailOtp;
+        activeVerif.email = email;
+        if (res.emailOtp) activeVerif.emailOtp = res.emailOtp;
         savePendingVerification(activeVerif);
         const emailInput = otpForm.querySelector('[name="emailOtp"]');
         if (emailInput && res.emailOtp) emailInput.value = res.emailOtp;
@@ -838,16 +957,26 @@ document.getElementById('resend-email-otp').addEventListener('click', async () =
         showToast(res.message || 'Email verification code sent');
     } catch (err) {
         showToast(err.message || 'Failed to resend email code', true);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Resend Email OTP';
+        }
     }
 });
 
-document.getElementById('resend-sms-otp').addEventListener('click', async () => {
-    const activeVerif = pendingVerification || loadPendingVerification();
+document.getElementById('resend-sms-otp')?.addEventListener('click', async () => {
+    const activeVerif = pendingVerification || loadPendingVerification() || {};
     if (!activeVerif || !activeVerif.phoneNumber) {
         showToast('No phone number registered with this session.', true);
         return;
     }
+    const btn = document.getElementById('resend-sms-otp');
     try {
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+        }
         const res = await api('/auth/resend-otp', {
             method: 'POST',
             body: JSON.stringify({ phoneNumber: activeVerif.phoneNumber, channel: 'SMS' })
@@ -860,6 +989,11 @@ document.getElementById('resend-sms-otp').addEventListener('click', async () => 
         showToast(res.message || 'SMS verification code sent');
     } catch (err) {
         showToast(err.message || 'Failed to resend SMS code', true);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Resend SMS OTP';
+        }
     }
 });
 
