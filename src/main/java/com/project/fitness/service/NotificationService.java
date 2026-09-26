@@ -25,21 +25,27 @@ public class NotificationService {
             JavaMailSender sender = mailSender.getIfAvailable();
             if (sender == null) {
                 log.info("Email OTP for {} is {}", email, code);
+                printDevOtpBanner("Email Verification", email, code);
                 return;
             }
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setFrom(from);
                 message.setTo(email);
-                message.setSubject("Fitness Tracker verification code");
-                message.setText("Your email verification OTP is " + code + ". It expires in a few minutes.");
+                message.setSubject("Your Fitness Tracker Verification Code");
+                message.setText("Your OTP code is: " + code + ". It will expire in 5 minutes.");
                 sender.send(message);
-                log.info("Email OTP sent to {}", email);
+                log.info("Email OTP sent successfully to {}", email);
             } catch (Exception ex) {
-                log.warn("Could not send email to {}. Use the OTP shown in the app (dev mode) or check mail settings. OTP={}",
-                        email, code);
+                log.warn("Failed to send email via SMTP to {}: {}", email, ex.getMessage());
+                System.err.println("Failed to send email via SMTP: " + ex.getMessage());
+                printDevOtpBanner("Email Verification", email, code);
             }
         });
+    }
+
+    public void sendOtpEmail(String toEmail, String otpCode) {
+        sendEmailOtp(toEmail, otpCode);
     }
 
     public void sendSmsOtp(String phoneNumber, String code) {
@@ -51,19 +57,28 @@ public class NotificationService {
             JavaMailSender sender = mailSender.getIfAvailable();
             if (sender == null) {
                 log.info("Password-reset OTP for {} is {}", email, code);
+                printDevOtpBanner("Password Reset", email, code);
                 return;
             }
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setFrom(from);
                 message.setTo(email);
-                message.setSubject("Fitness Tracker password reset code");
-                message.setText("Your password reset OTP is " + code + ". It expires in a few minutes.");
+                message.setSubject("Your Fitness Tracker Password Reset Code");
+                message.setText("Your password reset OTP is: " + code + ". It will expire in 5 minutes.");
                 sender.send(message);
-                log.info("Password-reset OTP sent to {}", email);
+                log.info("Password-reset OTP sent successfully to {}", email);
             } catch (Exception ex) {
-                log.warn("Could not send reset email to {}. OTP={}", email, code);
+                log.warn("Failed to send reset email via SMTP to {}: {}", email, ex.getMessage());
+                System.err.println("Failed to send reset email via SMTP: " + ex.getMessage());
+                printDevOtpBanner("Password Reset", email, code);
             }
         });
+    }
+
+    private void printDevOtpBanner(String type, String destination, String code) {
+        System.out.println("========== [DEVELOPMENT " + type.toUpperCase() + " OTP CODE] ==========");
+        System.out.println("OTP for " + destination + " is: " + code);
+        System.out.println("=================================================================");
     }
 }
