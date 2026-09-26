@@ -773,12 +773,18 @@ async function loadOauthStatus() {
 }
 
 function bindSocialButtons() {
-    const google = socialLogin.querySelector('a[href*="google"]');
-    const github = socialLogin.querySelector('a[href*="github"]');
+    const google = socialLogin.querySelector('a[href*="google"], [data-provider="google"]');
+    const github = socialLogin.querySelector('a[href*="github"], [data-provider="github"]');
     const handleSocial = (link, enabled, name) => {
         if (!link) return;
         link.addEventListener('click', async (e) => {
-            if (enabled) return;
+            const provider = link.getAttribute('data-provider') || name.toLowerCase();
+            if (enabled) {
+                e.preventDefault();
+                // .replace prevents /oauth2/authorization/... from remaining in the history stack
+                window.location.replace(`/oauth2/authorization/${provider}`);
+                return;
+            }
             e.preventDefault();
             try {
                 showToast(`Signing in with ${name}...`);
@@ -799,6 +805,17 @@ function bindSocialButtons() {
     };
     handleSocial(google, oauthStatus.google, 'Google');
     handleSocial(github, oauthStatus.github, 'GitHub');
+
+    document.querySelectorAll('.oauth-btn').forEach((button) => {
+        button.addEventListener('click', (e) => {
+            const provider = button.getAttribute('data-provider');
+            if (oauthStatus && oauthStatus[provider]) {
+                e.preventDefault();
+                // .replace prevents /oauth2/authorization/... from remaining in the history stack
+                window.location.replace(`/oauth2/authorization/${provider}`);
+            }
+        });
+    });
 }
 
 registerForm.addEventListener('submit', async (e) => {
@@ -1153,7 +1170,7 @@ function initInteractiveCalculator() {
 
 function captureOAuthRedirect() {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('oauthError')) {
+    if (params.get('oauthError') || params.get('error')) {
         const banner = document.getElementById('oauth-error');
         if (banner) {
             banner.textContent = 'Social sign-in was cancelled or failed. You can sign in with your email or try again.';
